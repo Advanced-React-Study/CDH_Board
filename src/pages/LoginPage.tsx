@@ -2,6 +2,8 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { LoginState } from "../states/LoginState";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Main = styled.div`
   display: flex;
@@ -70,24 +72,24 @@ const JoinInButton = styled.button`
   cursor: pointer;
 `;
 
-const userData = {
-  id: "dohee",
-  pw: "1234",
-};
-// 임시 로그인 정보
-
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [userID, setUserID] = useState<string>("");
   const [userPassword, setUserPassword] = useState<string>("");
   const setIsLoggin = useSetRecoilState(LoginState);
 
-  const login = (id: string, pw: string) => {
-    if (userData.id !== id || userData.pw !== pw) {
-      alert("아이디 또는 비밀번호가 올바르지 않습니다.");
-      return;
+  const Login = async (id: string, pw: string) => {
+    try {
+      await axios.post(`http://13.124.149.255:3001/user/login`, {
+        id: id,
+        password: pw,
+      });
+      setIsLoggin(true);
+      navigate("/main");
+      // 새로고침 -> react에서는 navigate를 사용하는 것이 좋음
+    } catch (e: any) {
+      alert(e.response.data.message);
     }
-    setIsLoggin(true);
-    window.location.href = "/main";
   };
 
   return (
@@ -118,14 +120,14 @@ const LoginPage = () => {
         </InputContainer>
         <LogInButton
           onClick={() => {
-            login(userID, userPassword);
+            Login(userID, userPassword);
           }}
         >
           Log in
         </LogInButton>
         <JoinInButton
           onClick={() => {
-            window.location.href = "/join";
+            navigate("/join");
           }}
         >
           Join in

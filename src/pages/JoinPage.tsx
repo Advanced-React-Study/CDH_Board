@@ -1,5 +1,7 @@
 import styled from "styled-components";
 import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Main = styled.div`
   display: flex;
@@ -59,14 +61,40 @@ const JoinInButton = styled.button`
 `;
 
 const JoinPage = () => {
+  const navigate = useNavigate();
   const [newID, setNewID] = useState<string>("");
   const [newPW, setNewPW] = useState<string>("");
+  const [newName, setNewName] = useState<string>("");
+
+  const signIn = async (id: string, pw: string, name: string) => {
+    try {
+      await axios.post(`http://13.124.149.255:3001/user/register`, {
+        id: id,
+        password: pw,
+        name: name,
+      });
+      alert("회원가입 성공");
+      navigate("/");
+    } catch (e: any) {
+      alert(JSON.stringify(e.response.data.message));
+    }
+  };
   return (
     <Main>
       <Container>
         <JoinInTitle>
           <span>Join In</span>
         </JoinInTitle>
+        <InputContainer>
+          <InputBox
+            type={"text"}
+            placeholder="your Name"
+            onChange={(e) => {
+              setNewName(e.target.value);
+            }}
+            required
+          ></InputBox>
+        </InputContainer>
         <InputContainer>
           <InputBox
             type={"text"}
@@ -79,7 +107,7 @@ const JoinPage = () => {
         </InputContainer>
         <InputContainer>
           <InputBox
-            type={"text"}
+            type={"password"}
             placeholder="new Password"
             onChange={(e) => {
               setNewPW(e.target.value);
@@ -87,7 +115,13 @@ const JoinPage = () => {
             required
           ></InputBox>
         </InputContainer>
-        <JoinInButton>Join in</JoinInButton>
+        <JoinInButton
+          onClick={() => {
+            signIn(newID, newPW, newName);
+          }}
+        >
+          Join in
+        </JoinInButton>
       </Container>
     </Main>
   );
